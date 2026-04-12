@@ -1,11 +1,8 @@
 package logic
 
 import scala.annotation.tailrec
-import scala.collection.parallel.immutable.ParMap
-import scala.collection.parallel.CollectionConverters.ImmutableMapIsParallelizable
-import scala.collection.parallel.CollectionConverters.ImmutableIterableIsParallelizable
-import scala.collection.parallel.CollectionConverters.MapIsParallelizable
-import scala.collection.parallel.CollectionConverters.IterableIsParallelizable
+import scala.collection.parallel.CollectionConverters.*
+
 
 /*
  T1 -Responsável por gerar uma coordenada aleatória
@@ -80,6 +77,9 @@ def play(board: Board, player: Stone, coordFrom: Coord2D, coordTo: Coord2D, lstO
       (None, lstOpenCoords)
   }
 }
+/*
+  Devolve as coordenadas adjacentes separadas por 2 de distancia
+ */
 private def getSpacedSurroundings(coord:Coord2D):List[Coord2D] = {
   List(
     (coord._1 - 2, coord._2), // Cima
@@ -89,7 +89,9 @@ private def getSpacedSurroundings(coord:Coord2D):List[Coord2D] = {
   )
 
 
-
+/*
+  Verificacao de que a peca na posicao coorFrom pode se movimentar para coordFrom
+ */
 }
 private def canPieceMoveToPos(board: Board, player: Stone, coordTo: Coord2D, coordFrom: Coord2D): (Boolean, Coord2D) = {
 
@@ -128,7 +130,7 @@ pedra.
       val (newBoard, newLstOpenCoords) = play (board = board, player = player, coordFrom = coorF, coordTo = coorT, lstOpenCoords = lstOpenCoords)
 
       (newBoard,newR1, newLstOpenCoords, coordTo)
-    case (None,None) =>
+    case _ =>
       (None, newR1, lstOpenCoords, None)
   }
 }
@@ -162,3 +164,42 @@ private def GiveRandomPlay(board: Board, r: MyRandom, player: Stone, lstOpenCoor
     }
   }
 }
+
+/*
+ T4- representar, visualmente, as jogadas no tabuleiro na linha de comando
+ */
+
+def showBoard(board:Board, width: Int, height: Int): Unit = {
+  val alphabet = ('A' to 'Z').toList
+  print(" " * 5)
+  for ( c <-0 until width) {
+    val columnLetter = getColumnLetter(c)
+    print(f"$columnLetter%4s")
+  }
+  print("\n\n")
+  for (r <- 0 until height) {
+    print(f"$r%5d")
+    for (c <- 0 until width) {
+
+      val symbol = board.get((r, c)) match {
+        case Some(Stone.Black) => "B"
+        case Some(Stone.White) => "W"
+        case None => "."
+      }
+
+      print(f"$symbol%4s")
+    }
+    println()
+  }
+}
+
+/*
+ Devolve a letra da coluna, uma vez de A,..., Z, AA, AB,...ZZ
+ */
+private def getColumnLetter(col:Int):String ={
+  if(col < 26)
+    ('A' + col).toChar.toString
+  else
+    getColumnLetter((col/26) - 1) + ('A' + (col % 26)).toChar.toString
+}
+
