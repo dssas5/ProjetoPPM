@@ -228,7 +228,7 @@ def showBoard(board:Board, width: Int, height: Int): Unit = {
 }
 
 /*
- Devolve a letra da coluna, uma vez de A,..., Z, AA, AB,...ZZ
+ Devolve a letra da coluna, uma vez de A,..., Z, AA, AB,..,ZZ,...
  */
 
 private def getColumnLetter(col:Int):String ={
