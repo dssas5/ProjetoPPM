@@ -2,8 +2,7 @@ package logic
 
 import scala.annotation.tailrec
 import scala.collection.parallel.CollectionConverters.*
-
-
+///////
 /*
  T1 -Responsável por gerar uma coordenada aleatória
   para a próxima jogada a partir da lista de posições livres fornecidas
@@ -24,7 +23,7 @@ def randomMove(lstOpenCoords: List[Coord2D], rand: MyRandom):(Coord2D, MyRandom)
   val index = (n & Int.MaxValue) % lstOpenCoords.length
   (lstOpenCoords(index), rng)
 }
-
+///////
 /*
  T2 -responsável por devolver um novo tabuleiro movendo a pedra
 indicada (coordFrom) para a coordenada fornecida (coordTo), se a mesma
@@ -122,12 +121,12 @@ private def getSpacedSurroundings(coord:Coord2D):List[Coord2D] = {
     (coord._1, coord._2 - 2), // Esquerda
     (coord._1, coord._2 + 2) // Direita
   )
-
+}
 
 /*
   Verificacao de que a peca na posicao coorFrom pode se movimentar para coordFrom
  */
-}
+
 private def canPieceMoveToPos(board: Board, player: Stone, coordTo: Coord2D, coordFrom: Coord2D): (Boolean, Coord2D) = {
 
 
@@ -231,6 +230,7 @@ def showBoard(board:Board, width: Int, height: Int): Unit = {
 /*
  Devolve a letra da coluna, uma vez de A,..., Z, AA, AB,...ZZ
  */
+
 private def getColumnLetter(col:Int):String ={
   if(col < 26)
     ('A' + col).toChar.toString

@@ -30,7 +30,6 @@ object Main {
         println("T2-b:Teste primeira Jogada valida das brancas")
 
         val rng = MyRandom(System.currentTimeMillis())
-        // Alterei de 'White' para 'Stone.White' por segurança
         val (board2Option, lstOpenCoords2) = play(board = board, player = Stone.White, coordFrom = (1, 4), coordTo = (3, 4), lstOpenCoords = lstOpenCoords)
         println()
 
