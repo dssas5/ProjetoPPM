@@ -22,7 +22,7 @@ object Main {
 
     createInitialBoard(8, 8, None) match {
       case Some((board, lstOpenCoords)) =>
-        showBoard(board, 8, 8)
+        println(boardToString(board, 8, 8))
         println()
         print(s"Coordenadas vazias:$lstOpenCoords")
         println()
@@ -35,7 +35,7 @@ object Main {
 
         board2Option match {
           case Some(board2) =>
-            showBoard(board2, 8, 8)
+            print(boardToString(board2, 8, 8))
             println()
             print(s"Coordenadas vazias:$lstOpenCoords2")
             println()
@@ -47,7 +47,7 @@ object Main {
 
             board3Option match {
               case Some(board3) =>
-                showBoard(board3, 8, 8)
+                print(boardToString(board3, 8, 8))
                 println()
                 println(s"Coordenadas vazias:$lstOpenCoords3")
                 println()
@@ -60,7 +60,7 @@ object Main {
 
                 board4Option match {
                   case Some(board4) =>
-                    showBoard(board4, 8, 8)
+                    print(boardToString(board4, 8, 8))
                   case None =>
                     println()
                     println("Erro (Esperado: Jogada Inválida)")
@@ -82,7 +82,7 @@ object Main {
                         case Some(a) =>
                           println("▢▢▢▢")
                           println(s"[Sucesso] Tabuleiro inicializado corretamente removendo: $cornerPair")
-                          showBoard(a._1,8,8)
+                          print(boardToString(a._1,8,8))
 
                           println()
                         case None =>
@@ -119,7 +119,7 @@ object Main {
 
                     board5Option match {
                       case Some(board5) =>
-                        showBoard(board5, 8, 8)
+                        print(boardToString(board5, 8, 8))
                         println()
                         println(s"Coordenadas vazias:$lstOpenCoords5")
                         println(s"Movimento feito:$coordPlayed")
@@ -129,7 +129,7 @@ object Main {
 
                         board6Option match {
                           case Some(board6) =>
-                            showBoard(board6, 8, 8)
+                            print(boardToString(board6, 8, 8))
                             println()
                             println(s"Coordenadas vazias:$lstOpenCoords6")
                             println(s"Movimento feito:$coordPlayed2")
@@ -156,7 +156,7 @@ object Main {
 
     createInitialBoard(num1, num2, None) match {
       case Some((testBoardSize, list)) =>
-        showBoard(testBoardSize, num1, num2)
+        print(boardToString(testBoardSize, num1, num2))
       case None =>
         println("Erro a inicializar o tabuleiro pequeno!")
     }

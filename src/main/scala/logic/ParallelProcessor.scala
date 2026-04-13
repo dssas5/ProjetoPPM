@@ -4,8 +4,8 @@ import scala.annotation.tailrec
 import scala.collection.parallel.CollectionConverters.*
 ///////
 /*
- T1 -Responsável por gerar uma coordenada aleatória
-  para a próxima jogada a partir da lista de posições livres fornecidas
+ T1 -Responsavel por gerar uma coordenada aleatoria
+  para a proxima jogada a partir da lista de posições livres fornecidas
  */
 
 case class MyRandom (seed: Long) {
@@ -25,9 +25,9 @@ def randomMove(lstOpenCoords: List[Coord2D], rand: MyRandom):(Coord2D, MyRandom)
 }
 ///////
 /*
- T2 -responsável por devolver um novo tabuleiro movendo a pedra
+ T2 -responsavel por devolver um novo tabuleiro movendo a pedra
 indicada (coordFrom) para a coordenada fornecida (coordTo), se a mesma
-representar uma jogada válida e None caso contrário. Para além do tabuleiro, é
+representar uma jogada valida e None caso contrario. Para alem do tabuleiro, e
 devolvida a nova lista de coordenadas livres
  */
 
@@ -36,7 +36,7 @@ devolvida a nova lista de coordenadas livres
  Inicializa o tabuleiro com pedras alternadas e remove um par adjacente inicial.
  Por default (caso removedPair seja None), remove as duas pedras centrais.
  Caso seja fornecido um par, valida se é uma jogada de canto permitida.
- Devolve Some((Board, inicialOpenCoords)) em caso de sucesso, ou None se o par a remover for inválido.
+ Devolve Some((Board, inicialOpenCoords)) em caso de sucesso, ou None se o par a remover for invalido.
  */
 
 def createInitialBoard(width: Int, height: Int, removedPair: Option[(Coord2D,Coord2D)]): Option[(Board, List[Coord2D])] = {
@@ -144,8 +144,8 @@ private def canPieceMoveToPos(board: Board, player: Stone, coordTo: Coord2D, coo
 }
 
 /*
- T3- responsável por jogar de forma aleatória numa das
-coordenadas livres do tabuleiro. Para além do tabuleiro, é devolvida a nova lista
+ T3- responsavel por jogar de forma aleatoria numa das
+coordenadas livres do tabuleiro. Para alem do tabuleiro, e devolvida a nova lista
 de coordenadas livres, novo MyRandom, e coordenada para onde foi movimentada a
 pedra.
  */
@@ -203,28 +203,29 @@ private def GiveRandomPlay(board: Board, r: MyRandom, player: Stone, lstOpenCoor
  T4- representar, visualmente, as jogadas no tabuleiro na linha de comando
  */
 
-def showBoard(board:Board, width: Int, height: Int): Unit = {
-  val alphabet = ('A' to 'Z').toList
-  print(" " * 5)
-  for ( c <-0 until width) {
-    val columnLetter = getColumnLetter(c)
-    print(f"$columnLetter%4s")
-  }
-  print("\n\n")
-  for (r <- 0 until height) {
-    print(f"$r%5d")
-    for (c <- 0 until width) {
+def boardToString(board: Board, width: Int, height: Int): String = {
 
+  val header = " " * 5 + (0 until width)
+    .map(c => f"${getColumnLetter(c)}%4s")
+    .mkString("")
+
+
+  val rows = (0 until height).map { r =>
+    val rowLabel = f"$r%5d"
+    val rowCells = (0 until width).map { c =>
       val symbol = board.get((r, c)) match {
         case Some(Stone.Black) => "B"
         case Some(Stone.White) => "W"
-        case None => "."
+        case _ => "."
       }
+      f"$symbol%4s"
+    }.mkString("")
 
-      print(f"$symbol%4s")
-    }
-    println()
-  }
+    rowLabel + rowCells
+  }.mkString("\n")
+
+
+  header + "\n\n" + rows
 }
 
 /*
