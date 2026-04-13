@@ -1,5 +1,5 @@
 import logic.*
-import logic.Stone.White
+
 
 
 import scala.annotation.tailrec
@@ -14,86 +14,154 @@ object Main {
       } yield (x, y)).toList
 
     println("T1:Teste para RandomMove")
-
     loop(openCoordsForTest, MyRandom(System.currentTimeMillis()), 0, 10)
+
     println("________")
     println("T2-a:Teste inicializacao do tabuleiro")
     println()
-    val (board, lstOpenCoords) = createInitialBoard(8, 8)
-    showBoard(board, 8, 8)
-    println()
-    print(s"Coordenadas vazias:$lstOpenCoords")
-    println()
-    println("________")
-    println("T2-b:Teste primeira Jogada valida das brancas")
-    val rng = MyRandom(System.currentTimeMillis())
-    val (board2, lstOpenCoords2) = play(board = board, player = White, coordFrom = (1, 4), coordTo = (3, 4), lstOpenCoords = lstOpenCoords)
-    println()
-    board2 match {
-      case Some(board2) => showBoard(board2, 8, 8)
+
+    createInitialBoard(8, 8, None) match {
+      case Some((board, lstOpenCoords)) =>
+        showBoard(board, 8, 8)
         println()
-        print(s"Coordenadas vazias:$lstOpenCoords2")
-      case None =>
-    }
-    println()
-    println("________")
-    println("T2-b:Teste segunda Jogada valida das pretas")
-    println()
-    board2 match {
-      case Some(board2) =>
-        val (board3, lstOpenCoords3) = play(board = board2, player = Stone.Black, coordFrom = (4, 4), coordTo = (2, 4), lstOpenCoords = lstOpenCoords2)
-        board3 match {
-          case Some(board3) => showBoard(board3, 8, 8)
+        print(s"Coordenadas vazias:$lstOpenCoords")
+        println()
+        println("________")
+        println("T2-b:Teste primeira Jogada valida das brancas")
+
+        val rng = MyRandom(System.currentTimeMillis())
+        // Alterei de 'White' para 'Stone.White' por segurança
+        val (board2Option, lstOpenCoords2) = play(board = board, player = Stone.White, coordFrom = (1, 4), coordTo = (3, 4), lstOpenCoords = lstOpenCoords)
+        println()
+
+        board2Option match {
+          case Some(board2) =>
+            showBoard(board2, 8, 8)
             println()
-            println(s"Coordenadas vazias:$lstOpenCoords3")
+            print(s"Coordenadas vazias:$lstOpenCoords2")
             println()
             println("________")
-            println("T2-c:Teste jogada invalida brancas")
-            val (board4, lstOpenCoords4) = play(board = board3, player = Stone.Black, coordFrom = (5, 4), coordTo = (3, 4), lstOpenCoords = lstOpenCoords3)
-            board4 match {
-              case Some(board4) => showBoard(board4, 8, 8)
-              case None =>
+            println("T2-b:Teste segunda Jogada valida das pretas")
+            println()
+
+            val (board3Option, lstOpenCoords3) = play(board = board2, player = Stone.Black, coordFrom = (4, 4), coordTo = (2, 4), lstOpenCoords = lstOpenCoords2)
+
+            board3Option match {
+              case Some(board3) =>
+                showBoard(board3, 8, 8)
                 println()
-                println("Erro")
+                println(s"Coordenadas vazias:$lstOpenCoords3")
                 println()
                 println("________")
-                println("T3:Teste 2 jogadas aleatoria branca e depois preta")
-                println()
-                val (board5, rng2, lstOpenCoords5, coordPlayed) = playRandomly(board = board3, r = rng, player = Stone.White, lstOpenCoords = lstOpenCoords3, f = randomMove)
-                board5 match {
-                  case Some(board5) => showBoard(board5, 8, 8)
+                println("T2-c:Teste jogada invalida brancas")
+
+
+
+                val (board4Option, lstOpenCoords4) = play(board = board3, player = Stone.Black, coordFrom = (5, 4), coordTo = (3, 4), lstOpenCoords = lstOpenCoords3)
+
+                board4Option match {
+                  case Some(board4) =>
+                    showBoard(board4, 8, 8)
+                  case None =>
                     println()
-                    println(s"Coordenadas vazias:$lstOpenCoords5")
-                    println(s"Movimento feito:$coordPlayed")
+                    println("Erro (Esperado: Jogada Inválida)")
                     println()
-                    val (board6, rng3, lstOpenCoords6, coordPlayed2) = playRandomly(board = board5, r = rng2, player = Stone.Black, lstOpenCoords = lstOpenCoords5, f = randomMove)
-                    board6 match {
-                      case Some(board6) => showBoard(board6, 8, 8)
-                        println()
-                        println(s"Coordenadas vazias:$lstOpenCoords5 ")
-                        println(s"Movimento feito:$coordPlayed2")
-                        println()
-                      case _ =>
-                          //nada
+                    println("________")
+                    println("T2-d: Testes de Inicialização com Cantos (Tabuleiro 8x8)")
+                    println()
+
+                    // As 8 combinações possíveis para um tabuleiro 8x8
+                    val validCorners8x8 = List(
+                      ((0, 0), (0, 1)), ((0, 0), (1, 0)),
+                      ((7, 0), (7, 1)), ((7, 0), (6, 0)),
+                      ((0, 6), (0, 7)), ((0, 7), (1, 7)),
+                      ((7, 7), (7, 6)), ((7, 7), (6, 7))
+                    )
+
+                    validCorners8x8.foreach { cornerPair =>
+                      createInitialBoard(8, 8, Some(cornerPair)) match {
+                        case Some(a) =>
+                          println("▢▢▢▢")
+                          println(s"[Sucesso] Tabuleiro inicializado corretamente removendo: $cornerPair")
+                          showBoard(a._1,8,8)
+
+                          println()
+                        case None =>
+                          println("▢▢▢▢")
+                          println(s"[FALHA CRÍTICA] O sistema rejeitou um canto válido: $cornerPair")
+                      }
+                      println("▢▢▢▢")
                     }
-                  case _ =>
-                  //nada
+
+                    println()
+                    println("________")
+                    println("T2-e: Teste de Inicialização Inválida")
+                    println()
+
+                    // Uma dupla de peças adjacentes, mas que NÃO estão nem num canto nem no centro perfeito
+                    val invalidPair = ((2, 2), (2, 3))
+
+                    println(s"A tentar inicializar com remoção inválida: $invalidPair...")
+
+                    createInitialBoard(8, 8, Some(invalidPair)) match {
+                      case Some(_) =>
+                        println("▢▢▢▢")
+                        println(s"[FALHA CRÍTICA] O sistema aceitou uma remoção que viola as regras!")
+                      case None =>
+                        println("▢▢▢▢")
+                        println(s"[Sucesso] O sistema bloqueou a jogada inválida e devolveu None perfeitamente.")
+                    }
+                    println("▢▢▢▢")
+                    println("________")
+                    println("T3:Teste 2 jogadas aleatorias branca e depois preta")
+                    println()
+
+                    val (board5Option, rng2, lstOpenCoords5, coordPlayed) = playRandomly(board = board3, r = rng, player = Stone.White, lstOpenCoords = lstOpenCoords3, f = randomMove)
+
+                    board5Option match {
+                      case Some(board5) =>
+                        showBoard(board5, 8, 8)
+                        println()
+                        println(s"Coordenadas vazias:$lstOpenCoords5")
+                        println(s"Movimento feito:$coordPlayed")
+                        println()
+
+                        val (board6Option, rng3, lstOpenCoords6, coordPlayed2) = playRandomly(board = board5, r = rng2, player = Stone.Black, lstOpenCoords = lstOpenCoords5, f = randomMove)
+
+                        board6Option match {
+                          case Some(board6) =>
+                            showBoard(board6, 8, 8)
+                            println()
+                            println(s"Coordenadas vazias:$lstOpenCoords6")
+                            println(s"Movimento feito:$coordPlayed2")
+                            println()
+                          case None => // nada
+                        }
+                      case None => // nada
+                    }
                 }
+              case None => println("Erro na 2ª jogada")
             }
-          case None =>
-
+          case None => println("Erro na 1ª jogada")
         }
-
-      case None =>
+      case None => println("Erro crítico: Tabuleiro inicial não gerado!")
     }
+
     println()
     println("________")
     println("T4:Teste limites do tabuleiro de tamanho variavel ")
-    println
-    val num1 = 3
-    val num2 = 3
-    val (testBoardSize, list) = createInitialBoard(num1, num2)
-    showBoard(testBoardSize, num1, num2)
+    println()
+
+    val num1 = 30
+    val num2 = 30
+
+    createInitialBoard(num1, num2, None) match {
+      case Some((testBoardSize, list)) =>
+        showBoard(testBoardSize, num1, num2)
+      case None =>
+        println("Erro a inicializar o tabuleiro pequeno!")
+    }
+
   }
 
   @tailrec

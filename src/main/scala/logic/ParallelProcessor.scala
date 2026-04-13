@@ -32,7 +32,15 @@ representar uma jogada válida e None caso contrário. Para além do tabuleiro, 
 devolvida a nova lista de coordenadas livres
  */
 
-def createInitialBoard(width: Int, height: Int): (Board, List[Coord2D]) = {
+
+/*
+ Inicializa o tabuleiro com pedras alternadas e remove um par adjacente inicial.
+ Por default (caso removedPair seja None), remove as duas pedras centrais.
+ Caso seja fornecido um par, valida se é uma jogada de canto permitida.
+ Devolve Some((Board, inicialOpenCoords)) em caso de sucesso, ou None se o par a remover for inválido.
+ */
+
+def createInitialBoard(width: Int, height: Int, removedPair: Option[(Coord2D,Coord2D)]): Option[(Board, List[Coord2D])] = {
   val coords = for {
     r <- 0 until height
     c <- 0 until width
@@ -42,18 +50,45 @@ def createInitialBoard(width: Int, height: Int): (Board, List[Coord2D]) = {
     val stone = if ((r + c) % 2 == 0) Stone.Black else Stone.White
     ((r, c), stone)
   }.toMap
-
   val centerR = height / 2
   val centerC = width / 2
 
   val removedCoord1 = (centerR - 1, centerC - 1)
   val removedCoord2 = (centerR - 1, centerC)
+  removedPair match {
+    case Some(value) =>
 
-  val finalBoard = boardData - removedCoord1 - removedCoord2
+      val corners = List (
+      ((0, 0), (0, 1) ),
+      ((0, 0), (1, 0) ),
+      ((height - 1, 0), (height - 1, 1) ),
+      ((height - 1, 0), (height - 2, 0) ),
+      ((0, width - 2), (0, width - 1) ),
+      ((0, width - 1), (1, width - 1) ),
+      ((height - 1, width - 1), (height - 1, width - 2) ),
+      ((height - 1, width - 1), (height - 2, width - 1) ),
 
-  val initialOpenCoords = List(removedCoord1, removedCoord2)
+      )
+      val initialPossibleRemovals = (removedCoord1, removedCoord2) :: corners
+      val validRemoval = initialPossibleRemovals.exists(par =>
+        par == value || par == (value._2, value._1))
+      if (validRemoval)
+        val finalBoard = boardData - value._1 - value._2
+        Some(finalBoard.par, List(value._1, value._2))
+      else
+        None
 
-  (finalBoard.par, initialOpenCoords)
+    case _ =>
+      val finalBoard = boardData - removedCoord1 - removedCoord2
+      val initialOpenCoords = List(removedCoord1, removedCoord2)
+      Some(finalBoard.par, initialOpenCoords)
+  }
+
+
+
+
+
+
 }
 
 def play(board: Board, player: Stone, coordFrom: Coord2D, coordTo: Coord2D, lstOpenCoords: List[Coord2D]): (Option[Board], List[Coord2D]) = {
