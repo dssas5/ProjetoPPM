@@ -63,13 +63,13 @@ object Main {
                     print(boardToString(board4, 8, 8))
                   case None =>
                     println()
-                    println("Erro (Esperado: Jogada Inválida)")
+                    println("Erro (Esperado: Jogada Invalida)")
                     println()
                     println("________")
-                    println("T2-d: Testes de Inicialização com Cantos (Tabuleiro 8x8)")
+                    println("T2-d: Testes de Inicializacao com Cantos (Tabuleiro 8x8)")
                     println()
 
-                    // As 8 combinações possíveis para um tabuleiro 8x8
+                    // As 8 combinacoes possiveis para um tabuleiro 8x8
                     val validCorners8x8 = List(
                       ((0, 0), (0, 1)), ((0, 0), (1, 0)),
                       ((7, 0), (7, 1)), ((7, 0), (6, 0)),
@@ -80,37 +80,37 @@ object Main {
                     validCorners8x8.foreach { cornerPair =>
                       createInitialBoard(8, 8, Some(cornerPair)) match {
                         case Some(a) =>
-                          println("▢▢▢▢")
+                          println("====")
                           println(s"[Sucesso] Tabuleiro inicializado corretamente removendo: $cornerPair")
                           print(boardToString(a._1,8,8))
 
                           println()
                         case None =>
-                          println("▢▢▢▢")
-                          println(s"[FALHA CRÍTICA] O sistema rejeitou um canto válido: $cornerPair")
+                          println("====")
+                          println(s"[FALHA] O sistema rejeitou um canto valido: $cornerPair")
                       }
-                      println("▢▢▢▢")
+                      println("====")
                     }
 
                     println()
                     println("________")
-                    println("T2-e: Teste de Inicialização Inválida")
+                    println("T2-e: Teste de Inicializacao Invalida")
                     println()
 
-                    // Uma dupla de peças adjacentes, mas que NÃO estão nem num canto nem no centro perfeito
+                    // Uma dupla de pecas adjacentes, mas que NAO estao nem num canto nem no centro perfeito
                     val invalidPair = ((2, 2), (2, 3))
 
-                    println(s"A tentar inicializar com remoção inválida: $invalidPair...")
+                    println(s"A tentar inicializar com remocao invalida: $invalidPair...")
 
                     createInitialBoard(8, 8, Some(invalidPair)) match {
                       case Some(_) =>
-                        println("▢▢▢▢")
-                        println(s"[FALHA CRÍTICA] O sistema aceitou uma remoção que viola as regras!")
+                        println("====")
+                        println(s"[FALHA] O sistema aceitou uma remocao que viola as regras!")
                       case None =>
-                        println("▢▢▢▢")
-                        println(s"[Sucesso] O sistema bloqueou a jogada inválida e devolveu None perfeitamente.")
+                        println("====")
+                        println(s"[Sucesso] O sistema bloqueou a jogada invalida e devolveu None perfeitamente.")
                     }
-                    println("▢▢▢▢")
+                    println("====")
                     println("________")
                     println("T3:Teste 2 jogadas aleatorias branca e depois preta")
                     println()
@@ -139,11 +139,11 @@ object Main {
                       case None => // nada
                     }
                 }
-              case None => println("Erro na 2ª jogada")
+              case None => println("Erro na segunda jogada")
             }
-          case None => println("Erro na 1ª jogada")
+          case None => println("Erro na primeira jogada")
         }
-      case None => println("Erro crítico: Tabuleiro inicial não gerado!")
+      case None => println("Erro: Tabuleiro inicial nao gerado!")
     }
 
     println()

@@ -5,7 +5,7 @@ import scala.collection.parallel.CollectionConverters.*
 ///////
 /*
  T1 -Responsavel por gerar uma coordenada aleatoria
-  para a proxima jogada a partir da lista de posições livres fornecidas
+  para a proxima jogada a partir da lista de posicoes livres fornecidas
  */
 
 case class MyRandom (seed: Long) {
@@ -35,7 +35,7 @@ devolvida a nova lista de coordenadas livres
 /*
  Inicializa o tabuleiro com pedras alternadas e remove um par adjacente inicial.
  Por default (caso removedPair seja None), remove as duas pedras centrais.
- Caso seja fornecido um par, valida se é uma jogada de canto permitida.
+ Caso seja fornecido um par, valida se e uma jogada de canto permitida.
  Devolve Some((Board, inicialOpenCoords)) em caso de sucesso, ou None se o par a remover for invalido.
  */
 

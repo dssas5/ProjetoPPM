@@ -2,7 +2,7 @@ package logic
 
 import scala.collection.parallel.immutable._
 
-// Definições obrigatórias do enunciado:
+// Definicoes obrigatorias do enunciado:
 type Coord2D = (Int, Int)
 
 enum Stone:
