@@ -49,14 +49,16 @@ def createInitialBoard(width: Int, height: Int, removedPair: Option[(Coord2D,Coo
     val stone = if ((r + c) % 2 == 0) Stone.Black else Stone.White
     ((r, c), stone)
   }.toMap
-  val centerR = height / 2
+  val centerR  = height / 2
   val centerC = width / 2
 
   val removedCoord1 = (centerR - 1, centerC - 1)
   val removedCoord2 = (centerR - 1, centerC)
   removedPair match {
     case Some(value) =>
-
+      // 0 1 2 3
+      // 4 5 6 7 
+      // 8 9 10 11
       val corners = List (
       ((0, 0), (0, 1) ),
       ((0, 0), (1, 0) ),
@@ -237,5 +239,41 @@ private def getColumnLetter(col:Int):String ={
     ('A' + col).toChar.toString
   else
     getColumnLetter((col/26) - 1) + ('A' + (col % 26)).toChar.toString
+}
+
+/*
+ Devolve o numero da coluna apartir da litra
+ */
+def columnLettersToIndex(letters: String): Int = {
+  val UpperCaseLetters = letters.toUpperCase()
+  if(letters.length == 1)
+    UpperCaseLetters.head - 'A'
+  else
+    (UpperCaseLetters.head+1) * math.pow(26,letters.length - 1).toInt + columnLettersToIndex(UpperCaseLetters.tail)
+}
+
+/*
+ T5 - Metodo responsável por verificar se o computador ou o jogador
+ ganhou o jogo.
+ */
+
+def playerWon(board: Board, player: Stone,lstOpenCoords: List[Coord2D]):Boolean = {
+  val (_,rng) = MyRandom(System.currentTimeMillis()).nextInt
+  val otherPlayer = List(Stone.Black, Stone.White).filterNot(p => player.equals(p)).head
+  playRandomly(board,rng,otherPlayer,lstOpenCoords,randomMove)._1.isDefined
+}
+
+
+def timeConverterString(timeSec:Int): String = {
+  val hours = timeSec/3600
+  val minutes = (timeSec % 3600) / 60
+  val seconds = timeSec % 60
+  hours match{
+    case 0 =>
+      f"$minutes%02d:$seconds%02d"
+    case _ =>
+      f"$hours%02d:$minutes%02d:$seconds%02d"
+  }
+
 }
 
