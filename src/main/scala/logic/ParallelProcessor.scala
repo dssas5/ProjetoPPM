@@ -234,7 +234,7 @@ def boardToString(board: Board, width: Int, height: Int): String = {
  Devolve a letra da coluna, uma vez de A,..., Z, AA, AB,..,ZZ,...
  */
 
-private def getColumnLetter(col:Int):String ={
+def getColumnLetter(col:Int):String ={
   if(col < 26)
     ('A' + col).toChar.toString
   else
@@ -260,7 +260,7 @@ def columnLettersToIndex(letters: String): Int = {
 def playerWon(board: Board, player: Stone,lstOpenCoords: List[Coord2D]):Boolean = {
   val (_,rng) = MyRandom(System.currentTimeMillis()).nextInt
   val otherPlayer = List(Stone.Black, Stone.White).filterNot(p => player.equals(p)).head
-  playRandomly(board,rng,otherPlayer,lstOpenCoords,randomMove)._1.isDefined
+  playRandomly(board, rng, otherPlayer, lstOpenCoords, randomMove)._1.isEmpty
 }
 
 
@@ -275,5 +275,163 @@ def timeConverterString(timeSec:Int): String = {
       f"$hours%02d:$minutes%02d:$seconds%02d"
   }
 
+}
+
+
+def getRemovalList(height: Int, width: Int): List[(Coord2D, Coord2D)] = {
+  val centerR = height / 2
+  val centerC = width / 2
+  val removalList = List(
+    ((0, 0), (0, 1)),
+    ((0, 0), (1, 0)),
+    ((0, width - 2), (0, width - 1)),
+    ((0, width - 1), (1, width - 1)),
+    ((height - 1, 0), (height - 1, 1)),
+    ((height - 1, 0), (height - 2, 0)),
+    ((height - 1, width - 1), (height - 1, width - 2)),
+    ((height - 1, width - 1), (height - 2, width - 1)),
+    ((centerR - 1, centerC - 1), (centerR - 1, centerC))
+  )
+  removalList
+}
+
+def hasValidJumpsFrom(board: Board, player: Stone, currentCoord: Coord2D, lstOpenCoords: List[Coord2D]): Boolean = {
+  getSpacedSurroundings(currentCoord).exists(target =>
+    play(board, player, currentCoord, target, lstOpenCoords)._1.isDefined
+  )
+}
+
+// psra AI
+
+
+// Na tua camada logic
+def getAllValidMoves(board: Board, player: Stone, openCoords: List[Coord2D], dims: (Int, Int)): List[(Coord2D, Coord2D)] = {
+  val (rows, cols) = dims
+  val allPieces = for {
+    r <- 0 until rows
+    c <- 0 until cols
+    if board.get((r, c)).contains(player)
+  } yield (r, c)
+
+  allPieces.flatMap { from =>
+    getSpacedSurroundings(from).filter { to =>
+      play(board, player, from, to, openCoords)._1.isDefined
+    }.map(to => (from, to))
+  }.toList
+}
+// Retorna a melhor jogada. Retorna None se nao houver jogadas (derrota).
+// Alteramos o Option para devolver um Tuplo: (Caminho, Score)
+def getAiMove(board: Board, player: Stone, openCoords: List[Coord2D], degree: Int, pieceTrainEnabled: Boolean, rng: MyRandom): (Option[(List[Coord2D], Int)], MyRandom) = {
+
+  val possiblePaths = getAllValidTurnPaths(board, player, openCoords, pieceTrainEnabled)
+  if (possiblePaths.isEmpty) return (None, rng)
+
+  degree match {
+    case 1 =>
+      // Grau 1 (Aleatorio): Devolvemos o caminho e um score de -1 para indicar "N/A"
+      val (rawInt, nextRng) = rng.nextInt
+      val index = (rawInt & Int.MaxValue) % possiblePaths.length
+      (Some((possiblePaths(index), -1)), nextRng)
+
+    case _ =>
+      val (evaluatedMoves, finalRng) = possiblePaths.foldLeft((List.empty[(List[Coord2D], Int)], rng)) {
+        case ((listaAcumulada, currentRng), path) =>
+          val (Some(newBoard), newOpenCoords) = playSequence(board, player, path, openCoords)
+
+          val numSimulations = 10
+          val (wins, rngAfterSims) = (1 to numSimulations).foldLeft((0, currentRng)) {
+            case ((winCount, r), _) =>
+              val nextP = if (player == Stone.White) Stone.Black else Stone.White
+              val (simScore, nextR) = simulateGameToEnd(newBoard, nextP, player, degree - 1, newOpenCoords, pieceTrainEnabled, r)
+              (winCount + simScore, nextR)
+          }
+          (listaAcumulada :+ (path, wins), rngAfterSims)
+      }
+
+      // maxBy devolve logo o Tuplo inteiro (MelhorCaminho, ScoreDesseCaminho)
+      val bestPathAndScore = evaluatedMoves.maxBy(tuplo => tuplo._2)
+      (Some(bestPathAndScore), finalRng)
+  }
+}
+
+@tailrec
+@tailrec
+def simulateGameToEnd(currentBoard: Board, currentPlayer: Stone, originalAiPlayer: Stone, simulationDegree: Int, currentOpenCoords: List[Coord2D], pieceTrainEnabled: Boolean, rng: MyRandom): (Int, MyRandom) = {
+
+  val (pathOption, nextRng) = getAiMove(currentBoard, currentPlayer, currentOpenCoords, simulationDegree, pieceTrainEnabled, rng)
+
+  pathOption match {
+    case Some((path, _)) =>
+      val (Some(nextBoard), nextOpenCoords) = playSequence(currentBoard, currentPlayer, path, currentOpenCoords)
+      val nextPlayer = if (currentPlayer == Stone.White) Stone.Black else Stone.White
+      simulateGameToEnd(nextBoard, nextPlayer, originalAiPlayer, simulationDegree, nextOpenCoords, pieceTrainEnabled, nextRng)
+
+    case None =>
+      val score = if (currentPlayer == originalAiPlayer) 0 else 1
+      (score, nextRng)
+  }
+}
+
+@tailrec
+def playSequence(board: Board, player: Stone, path: List[Coord2D], openCoords: List[Coord2D]): (Option[Board], List[Coord2D]) = {
+  path match {
+    case from :: to :: restOfThePath =>
+      play(board, player, from, to, openCoords) match {
+        case (Some(newBoard), newOpenCoords) =>
+          val nextPath = to :: restOfThePath // chamar de novo com o from removido
+          playSequence(newBoard, player, nextPath, newOpenCoords)
+        case _ =>
+          // Se algum salto a meio do comboio, a sequencia toda falha
+          (None, openCoords)
+      }
+
+    // Se a lista tiver apenas 1 ou 0elementos estamos na coordenada final
+    case _ =>
+      (Some(board), openCoords)
+  }
+}
+
+def getAllValidTurnPaths(board: Board, player: Stone, openCoords: List[Coord2D], pieceTrainEnabled: Boolean): List[List[Coord2D]] = {
+  val allPieces = board.collect {
+    case (coord, stone) if stone == player => coord
+  }.toList
+
+  allPieces.flatMap { startCoord =>
+    //movimentos a volta
+    val firstMoves = getSpacedSurroundings(startCoord).filter { target =>
+      play(board, player, startCoord, target, openCoords)._1.isDefined
+    }
+    // caso piecetrain estiver ativo
+    firstMoves.flatMap { target =>
+      if (pieceTrainEnabled) {
+
+        val (Some(newBoard), newOpen) = play(board, player, startCoord, target, openCoords)
+        buildTrains(newBoard, player, List(startCoord, target), newOpen)
+      } else {
+        List(List(startCoord, target))
+      }
+    }
+  }
+}
+
+def buildTrains(board: Board, player: Stone, pathSoFar: List[Coord2D], currentOpenCoords: List[Coord2D]): List[List[Coord2D]] = {
+  val currentPos = pathSoFar.last
+
+
+  val nextJumps = getSpacedSurroundings(currentPos).filter { target =>
+    play(board, player, currentPos, target, currentOpenCoords)._1.isDefined
+  }
+
+  if (nextJumps.isEmpty) {
+    List(pathSoFar)
+  } else {
+
+    val stopHere = List(pathSoFar)
+    val continuations = nextJumps.flatMap { target =>
+      val (Some(nextBoard), nextOpen) = play(board, player, currentPos, target, currentOpenCoords)
+      buildTrains(nextBoard, player, pathSoFar :+ target, nextOpen)
+    }
+    stopHere ++ continuations // Devolvemos as rotas curtas e as longas
+  }
 }
 
