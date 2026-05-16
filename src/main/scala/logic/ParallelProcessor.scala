@@ -116,7 +116,7 @@ def play(board: Board, player: Stone, coordFrom: Coord2D, coordTo: Coord2D, lstO
 /*
   Devolve as coordenadas adjacentes separadas por 2 de distancia
  */
-private def getSpacedSurroundings(coord:Coord2D):List[Coord2D] = {
+def getSpacedSurroundings(coord:Coord2D):List[Coord2D] = {
   List(
     (coord._1 - 2, coord._2), // Cima
     (coord._1 + 2, coord._2), // Baixo
@@ -392,9 +392,12 @@ def playSequence(board: Board, player: Stone, path: List[Coord2D], openCoords: L
 }
 
 def getAllValidTurnPaths(board: Board, player: Stone, openCoords: List[Coord2D], pieceTrainEnabled: Boolean): List[List[Coord2D]] = {
-  val allPieces = board.collect {
-    case (coord, stone) if stone == player => coord
-  }.toList
+
+  val allPieces = board.foldLeft(List.empty[Coord2D]) {
+    case (acc, (coord, stone)) if stone == player => coord :: acc
+    case (acc, _) => acc
+  }
+
 
   allPieces.flatMap { startCoord =>
     //movimentos a volta
