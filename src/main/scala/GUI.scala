@@ -1,7 +1,9 @@
+
 import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.{Parent, Scene}
 import javafx.stage.Stage
+
 
 class GUI extends Application{
 

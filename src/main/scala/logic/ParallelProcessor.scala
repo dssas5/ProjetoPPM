@@ -249,7 +249,7 @@ def columnLettersToIndex(letters: String): Int = {
   if(letters.length == 1)
     UpperCaseLetters.head - 'A'
   else
-    (UpperCaseLetters.head+1) * math.pow(26,letters.length - 1).toInt + columnLettersToIndex(UpperCaseLetters.tail)
+    (UpperCaseLetters.head- 'A'  +1) * math.pow(26,letters.length - 1).toInt + columnLettersToIndex(UpperCaseLetters.tail)
 }
 
 /*
@@ -258,7 +258,7 @@ def columnLettersToIndex(letters: String): Int = {
  */
 
 def playerWon(board: Board, player: Stone,lstOpenCoords: List[Coord2D]):Boolean = {
-  val (_,rng) = MyRandom(System.currentTimeMillis()).nextInt
+  val (_,rng) = MyRandom(123456789L).nextInt //mudanca para ser funcional
   val otherPlayer = List(Stone.Black, Stone.White).filterNot(p => player.equals(p)).head
   playRandomly(board, rng, otherPlayer, lstOpenCoords, randomMove)._1.isEmpty
 }
@@ -435,6 +435,12 @@ def buildTrains(board: Board, player: Stone, pathSoFar: List[Coord2D], currentOp
       buildTrains(nextBoard, player, pathSoFar :+ target, nextOpen)
     }
     stopHere ++ continuations // Devolvemos as rotas curtas e as longas
+  }
+}
+
+object ParallelProcessor {
+  def main(args: Array[String]): Unit = {
+    println(columnLettersToIndex("AA"))
   }
 }
 
