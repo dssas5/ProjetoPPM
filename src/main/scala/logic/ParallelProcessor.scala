@@ -438,9 +438,5 @@ def buildTrains(board: Board, player: Stone, pathSoFar: List[Coord2D], currentOp
   }
 }
 
-object ParallelProcessor {
-  def main(args: Array[String]): Unit = {
-    println(columnLettersToIndex("AA"))
-  }
-}
+
 
