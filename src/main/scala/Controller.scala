@@ -20,7 +20,6 @@ class Controller {
   private var timeInput: TextField = _
   @FXML
   private var removalInput: ComboBox[Int] = _
-
   @FXML
   private var winnerOverlay: StackPane = _
   @FXML
@@ -38,6 +37,8 @@ class Controller {
 
   private var isOnTrain = false
 
+  private var luzesGuia = false
+
   private var config: GameConfig =
     GameConfig(
       timeLimit = 60,
@@ -49,6 +50,7 @@ class Controller {
     )
 
   private var timeLeft: Int = config.timeLimit
+
   private var clockTimeline: Timeline = _
 
   private var gameHistory: GameHistory = Nil
@@ -81,37 +83,7 @@ class Controller {
       startMenu.setManaged(true)
   }
 
-  @FXML
-  def onStartGameClicked(): Unit = {
-    val chosenStarter =
-      starterCombo.getValue match {
-        case "Brancas" => Stone.White
-        case _ => Stone.Black
-      }
 
-    val chosenTime =
-      try {
-        val value = timeInput.getText.trim.toInt
-        if value > 0 then value else config.timeLimit
-      } catch {
-        case _: NumberFormatException => config.timeLimit
-      }
-
-
-    val chosenRemoval = removalInput.getValue
-
-
-    config = config.copy(
-      starter = chosenStarter,
-      timeLimit = chosenTime,
-      removalSpot = chosenRemoval
-    )
-
-    startMenu.setVisible(false)
-    startMenu.setManaged(false)
-
-    startNewGame()
-  }
 
   private def startNewGame(): Unit = {
     val rows = config.dimensions._1
@@ -136,6 +108,7 @@ class Controller {
         selectedFrom = None
         aiPathHistory = List(None)
         isOnTrain = false
+        luzesGuia = false
         hideWinner()
         drawBoard()
         startClock()
@@ -180,10 +153,10 @@ class Controller {
         if( currentAiPath.exists(_.contains(coord))) {
           cell.setStyle("-fx-border-color: black; -fx-background-color: #a851a8;")
         }
-        if (selectedFrom.isDefined && validPaths.exists(path => selectedFrom.contains(path.head) && path.drop(2).contains((row, col)))) {
+        if (selectedFrom.isDefined && validPaths.exists(path => selectedFrom.contains(path.head) && path.drop(2).contains((row, col))) && luzesGuia) {
           cell.setStyle("-fx-border-color: black; -fx-background-color: orange;")
         }
-        if (selectedFrom.isDefined && validPaths.exists(path => selectedFrom.contains(path.head) && path.take(2).contains((row, col)))) {
+        if (selectedFrom.isDefined && validPaths.exists(path => selectedFrom.contains(path.head) && path.take(2).contains((row, col))) && luzesGuia) {
           cell.setStyle("-fx-border-color: black; -fx-background-color: #dcdc6a;")
         }
         if (selectedFrom.contains((row, col))) {
@@ -441,6 +414,67 @@ class Controller {
     }
   }
 
+  ///////////////////
+  // Butoes
+  def addButtons(): Unit = {
+    lowerBar.setStyle("-fx-border-color: black; -fx-background-color: #e3a85d")
+    lowerBar.getChildren.clear()
+    val undoButton = new Button("Undo")
+    undoButton.setOnAction(_ => {
+      onUndoClicked()
+    })
+
+    lowerBar.getChildren.add(undoButton)
+
+    val restartButton = new Button("Restart")
+
+    restartButton.setOnAction(_ => {
+      onRestartClicked()
+    })
+    lowerBar.getChildren.add(restartButton)
+
+    val pvpButton = new Button("PvP")
+    pvpButton.setOnAction(_ => {
+      onPvpClicked()
+    })
+
+    lowerBar.getChildren.add(pvpButton)
+    val pvpButtonName = config.mode match {
+      case PvE(t) => if (t == 1) "PvE(facil)" else if (t == 2) "PvE(medio)" else "PvE(dificil)"
+      case PvP => "PvE"
+    }
+    val pveButton = new Button(pvpButtonName)
+    pveButton.setOnAction(_ => {
+      onPveClicked()
+    })
+    lowerBar.getChildren.add(pveButton)
+
+    val guiaButton = new Button(if(luzesGuia) "guia:Ativado" else "guia:Desativado")
+    guiaButton.setOnAction(_=>{
+      onGuiaButtonClicked()
+    })
+    lowerBar.getChildren.add(guiaButton)
+
+    val pieceTrainName = if (config.pieceTrainEnabled) "pieceTrain:Ativado" else "pieceTrain:Desativado"
+    val pieceTrainButton = new Button(pieceTrainName)
+    pieceTrainButton.setOnAction(_ => {
+      onPieceTrainClicked()
+    })
+    lowerBar.getChildren.add(pieceTrainButton)
+
+    playerLabel.setText(currentState.currentPlayer match {
+      case Stone.White => "Brancas a jogar!"
+      case Stone.Black => "Pretas a jogar!"
+    })
+
+  }
+  @FXML
+  def onGuiaButtonClicked(): Unit = {
+    luzesGuia = !luzesGuia
+    drawBoard()
+  }
+
+  @FXML
   def onUndoClicked(): Unit = {
     if gameHistory.length > 2 then
       gameHistory = gameHistory.drop(2)
@@ -452,6 +486,7 @@ class Controller {
       println("Impossivel voltar atras")
   }
 
+  @FXML
   def onRestartClicked(): Unit = {
     if clockTimeline != null then
       clockTimeline.stop()
@@ -463,11 +498,13 @@ class Controller {
     startMenu.setManaged(true)
   }
 
+  @FXML
   def onPvpClicked(): Unit = {
     config = config.copy(mode = GameMode.PvP)
     drawBoard()
   }
 
+  @FXML
   def onPveClicked(): Unit = {
     config.mode match {
       case PvP => config = config.copy(mode = PvE(1))
@@ -476,57 +513,45 @@ class Controller {
     drawBoard()
   }
 
-  def addButtons(): Unit = {
-    lowerBar.setStyle("-fx-border-color: black; -fx-background-color: #e3a85d")
-    lowerBar.getChildren.clear()
-    val undoButton = new Button("Undo")
-    undoButton.setOnAction(_ =>{
-      onUndoClicked()
-    })
-
-    lowerBar.getChildren.add(undoButton)
-
-    val restartButton = new Button("Restart")
-
-    restartButton.setOnAction(_ =>{
-      onRestartClicked()
-    })
-    lowerBar.getChildren.add(restartButton)
-
-    val pvpButton = new Button("PvP")
-    pvpButton.setOnAction(_ => {
-      onPvpClicked()
-    })
-
-    lowerBar.getChildren.add(pvpButton)
-    var pvpButtonName = config.mode match {
-      case PvE(t) => if( t == 1) "PvE(facil)" else if(t == 2) "PvE(medio)" else "PvE(dificil)"
-      case PvP => "PvE"
-    }
-    var pveButton = new Button(pvpButtonName)
-    pveButton.setOnAction(_ =>{
-      onPveClicked()
-    })
-
-    lowerBar.getChildren.add(pveButton)
-    var pieceTrainName = if( config.pieceTrainEnabled) "pieceTrain:Ativado" else "pieceTrain:Desativado"
-    var pieceTrainButton = new Button(pieceTrainName)
-    pieceTrainButton.setOnAction(_ =>{
-      onPieceTrainClicked()
-    })
-    lowerBar.getChildren.add(pieceTrainButton)
-
-    playerLabel.setText(  currentState.currentPlayer match{
-      case Stone.White => "Brancas a jogar!"
-      case Stone.Black => "Pretas a jogar!"
-    })
-
-  }
-
+  @FXML
   def onPieceTrainClicked(): Unit = {
     config = config.copy(pieceTrainEnabled = !config.pieceTrainEnabled)
     drawBoard()
   }
+
+  @FXML
+  def onStartGameClicked(): Unit = {
+    val chosenStarter =
+      starterCombo.getValue match {
+        case "Brancas" => Stone.White
+        case _ => Stone.Black
+      }
+
+    val chosenTime =
+      try {
+        val value = timeInput.getText.trim.toInt
+        if value > 0 then value else config.timeLimit
+      } catch {
+        case _: NumberFormatException => config.timeLimit
+      }
+
+
+    val chosenRemoval = removalInput.getValue
+
+
+    config = config.copy(
+      starter = chosenStarter,
+      timeLimit = chosenTime,
+      removalSpot = chosenRemoval
+    )
+
+    startMenu.setVisible(false)
+    startMenu.setManaged(false)
+
+    startNewGame()
+  }
+  ///////////////////
+
 
   private def showWinner(message: String): Unit = {
     if clockTimeline != null then
@@ -601,7 +626,6 @@ class Controller {
     selectedFrom = None
     isOnTrain = false
     aiPathHistory = None :: aiPathHistory.tail
-
     drawBoard()
 
     config.mode match {

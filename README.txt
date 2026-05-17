@@ -33,3 +33,28 @@ No desenvolvimento desta camada, foi dada prioridade a qualidade do codigo e aos
 5. Imutabilidade e Funcoes de Ordem Superior:
    Ausencia total do uso de variaveis mutaveis (`var`) ou `return`. O mapeamento do dominio faz uso massivo de funcoes como `.map`, `.filterNot` e `.exists`, bem como passagem de funcoes-parametro (como a `f` na funcao `playRandomly`).
 ====================================================================
+Atualizacao: Jogo Completo (GUI, TUI e Inteligencia Artificial)
+====================================================================
+
+NOVAS FUNCIONALIDADES E ATUALIZACOES:
+Este projeto foi expandido para incluir a versao interativa e completa do jogo Konane, suportando agora as seguintes funcionalidades:
+
+1. Interfaces de Utilizador (GUI e TUI):
+   - GUI (JavaFX): Interface grafica completa e interativa, com capa menu, selecao de jogadas com o rato, visualizacao de caminhos validos e posicoes jogadas pela AI e um temporizador integrado, para além de botoes 'undo', 'restart', e outros.
+   - TUI: Interface de linha de comandos interativa que permite jogar via consola, suportando comandos avancados como 'undo', 'restart', 'chng-dim', 'chng-time', entre outros.
+
+2. Modos de Jogo:
+   - Jogador vs Jogador (PvP).
+   - Jogador vs Computador (PvE) com 3 niveis de dificuldade. A Inteligencia Artificial utiliza simulacoes de partidas para avaliar e escolher a melhor jogada possivel.
+
+3. Mecanicas Avancadas (Piece Train):
+   - Possibilidade de realizar capturas multiplas (saltos em serie/comboio) num unico turno. Esta mecanica pode ser ativada ou desativada nas configuracoes do jogo.
+
+4. Configuracoes Dinamicas:
+   - Personalizacao do tempo limite por jogada, dimensoes do tabuleiro ( no caso da TUI), jogador inicial (Pretas ou Brancas) e localizacao do par de pecas a remover no inicio da partida (cantos ou centro).
+   - Funcionalidade de historico que permite voltar atras nas jogadas (Undo) ou reiniciar a partida (Restart).
+
+
+COMO EXECUTAR (NOVAS INTERFACES):
+- Para iniciar a Interface Grafica (GUI): Executar o objeto FxApp contido no ficheiro GUI.scala.
+- Para iniciar a Interface de Texto (TUI): Executar o objeto TUI contido no ficheiro TUI.scala.
